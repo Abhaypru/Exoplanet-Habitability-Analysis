@@ -1,0 +1,772 @@
+\documentclass[twocolumn]{article}
+%\usepackage[draft]{graphicx}
+\usepackage{graphicx}
+\usepackage{times,natbib}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage[margin=0.75in,footskip=0.25in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\definecolor{lightgray}{gray}{0.9}
+\definecolor{keywordcolor}{rgb}{0,0,1}
+
+\lstset{
+    basicstyle=\ttfamily,
+    language=SQL,
+    keywordstyle=\color{keywordcolor},
+}
+
+% ---- User-defined astrophysical macros ----
+\newcommand{\Rearth}{R_\oplus}
+\newcommand{\Mearth}{M_\oplus}
+\newcommand{\Rsun}{R_\odot}
+\newcommand{\Msun}{M_\odot}
+\newcommand{\Lsun}{L_\odot}
+\newcommand{\Searth}{S_\oplus}
+\newcommand{\Teff}{T_\mathrm{eff}}
+\newcommand{\Teq}{T_\mathrm{eq}}
+\newcommand{\FeH}{[\mathrm{Fe/H}]}
+\newcommand{\logg}{\log g}
+\newcommand{\mjup}{M_\mathrm{Jup}}
+\newcommand{\rjup}{R_\mathrm{Jup}}
+
+\title{\bf Exoplanet Habitability in the Solar Neighbourhood: A Statistical Study of Confirmed Planet Populations}
+\author{Abhay Kumar Prusty (22MS087), Jeevan Jyoti Rout (25IP010), Koushik Singha (22MS088)}
+\date{}
+
+\begin{document}
+
+
+\twocolumn[
+\maketitle
+
+\vspace{-0.2cm}
+
+\begin{center}
+\begin{minipage}{1.00\textwidth}
+
+\begin{center}
+\textbf{\large ABSTRACT}
+\end{center}
+
+\vspace{0.4cm}
+
+\noindent
+We present a comprehensive statistical analysis of exoplanet habitability
+using the \href{https://exoplanetarchive.ipac.caltech.edu}{NASA Exoplanet Archive}
+dataset as of 1 May 2026, comprising \textbf{6,278 confirmed planets}.
+Our study combines six major data products, including PSCompPars,
+PS ($N = 39,816$ solutions), TD, STELLARHOSTS, microlensing
+($N = 883$), and direct imaging ($N = 49$).
+
+We define potentially habitable planet candidates (PHCs) using three
+constraints: habitable-zone insolation ($0.2 \leq S/\Searth \leq 1.8$),
+Earth-sized radii ($0.5 \leq R_p/\Rearth \leq 1.5$), and equilibrium
+temperatures ($200 \leq \Teq \leq 370\,\mathrm{K}$). This yields
+\textbf{29 PHCs}, of which \textbf{22 orbit M-dwarf stars}. The nearest
+candidate is Proxima Centauri~b ($1.30\,\mathrm{pc}$), while TRAPPIST-1
+hosts the largest concentration (four PHCs).
+
+We investigate key population trends, including the Fulton radius gap,
+the stellar metallicity--giant-planet correlation, and wide-orbit planet
+demographics from microlensing and direct imaging. A 25-figure atlas is
+constructed to visualise the multi-dimensional structure of the
+exoplanet population.
+
+The current census is strongly biased toward short-period planets due to
+transit selection effects, leading to an under-sampled habitable zone
+around Sun-like stars. Correcting for these biases suggests that the
+Milky Way may host $\sim 10^{10}$--$10^{11}$ potentially habitable rocky
+planets. Future facilities, including \textit{PLATO}, the Habitable Worlds
+Observatory, and the Extremely Large Telescopes, will be essential for
+detecting and characterising true Earth analogues.
+
+\end{minipage}
+\end{center}
+
+\vspace{0.5cm}
+]
+
+
+\section{Introduction}
+\label{sec:intro}
+
+The search for habitable worlds beyond the Solar System is a central goal of
+modern astrophysics. Since the first detection of an exoplanet around a
+Sun-like star, 51~Pegasi~b, by \citet{MayorQueloz1995}, the field has expanded
+rapidly. What began with a small number of gas-giant detections has evolved
+into a population of over 6,000 confirmed exoplanets, spanning a wide range
+of masses, radii, orbital architectures, and stellar environments.
+
+A major step forward came with the \textit{Kepler} mission
+\citep{Borucki2010}, which provided the first statistically meaningful
+measurement of planetary occurrence rates. Its results established that
+small planets ($R_p < 4\,\Rearth$) are common in the Galaxy
+\citep{Fressin2013, Petigura2013}. The Transiting Exoplanet Survey Satellite
+(\textit{TESS}; \citealt{Ricker2015}) has since extended this work to nearby
+bright stars, enabling detailed follow-up studies, particularly with the
+James Webb Space Telescope (\textit{JWST}; \citealt{Gardner2023}).
+
+Habitability is commonly defined as the ability of a planet to sustain liquid
+water on its surface \citep{Kasting1993}. This motivates the concept of the
+circumstellar habitable zone (HZ), the range of orbital distances within
+which a rocky planet with a CO$_2$--H$_2$O--N$_2$ atmosphere can maintain
+surface liquid water \citep{Kopparapu2013, Kopparapu2014}. However, the HZ
+alone does not fully determine habitability. Additional factors such as
+planetary mass and composition, orbital eccentricity, tidal locking,
+stellar activity, and long-term climate regulation are also important
+\citep{Shields2016}.
+
+In this work, we present a comprehensive, data-driven analysis of exoplanet
+habitability using the 1 May 2026 release of the NASA Exoplanet Archive
+\citep{NEA2026}. We combine six independent data products spanning all major
+detection methods and construct a 25-figure atlas to explore key trends in
+planetary and stellar properties. This approach enables a multi-dimensional
+view of the current habitable-planet census and provides constraints on the
+distribution of potentially habitable worlds in the Galaxy.
+
+The paper is organised as follows. Section~\ref{sec:data} describes the data
+and methodology. Sections~\ref{sec:discovery}--\ref{sec:di} present the main
+results. Section~\ref{sec:discussion} discusses the astrophysical implications,
+and Section~\ref{sec:conclusions} summarises our conclusions.
+
+
+\section{Data and Methods}
+\label{sec:data}
+
+\subsection{NASA Exoplanet Archive Data Products}
+
+All data were retrieved on 25 April 2026 from the NASA Exoplanet Archive
+(\url{https://exoplanetarchive.ipac.caltech.edu}). We use six primary
+data tables:
+
+\begin{enumerate}
+  \item \textbf{PSCompPars}: The Planetary Systems Composite Parameters
+  table provides one entry per confirmed planet, containing best-estimate
+  physical and orbital properties compiled from multiple published
+  solutions ($N = 6{,}278$).
+
+  \item \textbf{PS}: The Planetary Systems table includes all available
+  parameter solutions for each planet, allowing direct comparison between
+  independent analyses ($N = 39{,}816$).
+
+  \item \textbf{TD}: The Transit Detections table lists parameters derived
+  from individual transit fits, providing detailed constraints on transit
+  geometry and timing ($N = 36{,}068$).
+
+  \item \textbf{STELLARHOSTS}: This catalogue contains host-star properties,
+  including spectral type, effective temperature ($\Teff$), stellar mass
+  ($M_\star$), radius ($R_\star$), metallicity ($\FeH$), and surface gravity
+  ($\logg$) ($N = 47{,}558$).
+
+  \item \textbf{ML}: The Microlensing dataset includes physical parameters
+  of planets detected via gravitational microlensing, primarily probing
+  wide-orbit systems ($N = 883$).
+
+  \item \textbf{DI}: The Direct Imaging catalogue provides measurements of
+  angular separations, near-infrared contrast ratios, and orbital constraints
+  for directly imaged planets ($N = 49$).
+\end{enumerate}
+
+\subsection{Habitability Criteria}
+\label{sec:criteria}
+
+We define a \emph{potentially habitable candidate} (PHC) as a planet that
+simultaneously satisfies:
+\begin{align}
+  0.2\,\Searth &\leq S_p \leq 1.8\,\Searth,  \label{eq:insol} \\
+  0.5\,\Rearth &\leq R_p \leq 1.5\,\Rearth.  \label{eq:radius}
+\end{align}
+
+The insolation limits in Equation~(\ref{eq:insol}) follow the conservative
+habitable-zone prescription of \citet{Kopparapu2013}, bounded by the
+moist-greenhouse inner edge and the maximum-greenhouse outer edge.
+Equation~(\ref{eq:radius}) restricts the sample to predominantly rocky
+planets. The upper bound is motivated by the observed Fulton gap at
+$\sim 1.5$--$2.0\,\Rearth$ \citep{Fulton2017}, which marks the transition
+between rocky and volatile-rich planets, while the lower bound excludes
+objects unlikely to retain substantial atmospheres.
+
+The planetary equilibrium temperature is estimated as:
+\begin{equation}
+  \Teq = T_{\star}
+  \left(\frac{R_\star}{2a}\right)^{1/2}
+  \left(1 - A_B\right)^{1/4},
+  \label{eq:teq}
+\end{equation}
+where $A_B$ is the Bond albedo (assumed to be 0.30), $T_\star$ is the
+stellar effective temperature, $R_\star$ is the stellar radius, and $a$
+is the orbital semi-major axis.
+
+\subsection{Habitable Zone Boundaries}
+\label{sec:hzbounds}
+
+We adopt the analytic formulation of the habitable zone from
+\citet{Kopparapu2013}, expressed as:
+\begin{equation}
+  S_\mathrm{eff}(\Teff) =
+  S_{\mathrm{eff},\odot}
+  + a_1 T_\star + a_2 T_\star^2
+  + a_3 T_\star^3 + a_4 T_\star^4,
+  \label{eq:kopparapu}
+\end{equation}
+where $T_\star = \Teff - 5780\,\mathrm{K}$ and the coefficients
+$\{a_i\}$ depend on the specific habitable-zone boundary. We consider both
+conservative (moist greenhouse, maximum greenhouse) and optimistic
+(runaway greenhouse, early Mars) limits, and overlay the resulting
+$S_\mathrm{eff}$--$\Teff$ relations on the observed planet population
+(Figure~\ref{fig:kopparapu}).
+
+\subsection{Statistical Treatment}
+
+All analysis was performed in Python using widely used scientific
+computing libraries, including \texttt{pandas}, \texttt{NumPy},
+\texttt{SciPy}, and \texttt{Matplotlib}, for data handling,
+numerical computation, and visualisation.
+
+Given the strongly non-Gaussian nature of most planetary-parameter
+distributions, we characterise them using the median and median absolute
+deviation (MAD) rather than the mean and standard deviation. Measurements
+flagged as limits (\texttt{pl\_lim $\neq 0$}) are excluded from all fitting
+and binning procedures.
+% ============================================================
+\section{Results}
+% ============================================================
+
+\subsection{Discovery Methods and Temporal Trends}
+
+Figure~\ref{fig:discovery} summarises the distribution of confirmed
+exoplanets by detection method, along with the temporal evolution of
+discovery rates since 1992.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig01_discovery_overview.png}
+  \caption{
+    \textit{Left:} Distribution of 6,278 confirmed exoplanets by discovery
+    method. Transit photometry dominates (73.9\%), reflecting the sensitivity
+    of \textit{Kepler} and \textit{TESS} to short-period systems.
+    \textit{Right:} Annual discovery rate. Dashed vertical lines indicate
+    the launch of \textit{Kepler} (2009) and \textit{TESS} (2018).
+    The pronounced peak in 2016 ($N = 1,284$) corresponds to a major
+    \textit{Kepler} data-validation release.
+  }
+  \label{fig:discovery}
+\end{figure}
+
+Transit photometry accounts for 4,640 confirmed planets (73.9\%),
+and therefore dominates the current census. This reflects both the
+geometric transit probability ($P_\mathrm{tr} \propto R_\star/a$) and
+the exceptional statistical power of \textit{Kepler}'s continuous,
+high-cadence observations. The radial-velocity (RV) method contributes
+1,180 planets (18.8\%), providing direct mass measurements that are
+essential for interpreting transit-derived radii and bulk densities.
+
+Gravitational microlensing contributes 278 planets (4.4\%), uniquely
+probing wide-orbit ($\sim 1$-$10\,\mathrm{AU}$) systems at kiloparsec
+distances, a regime largely inaccessible to transit surveys. Direct
+imaging accounts for 97 planets (1.5\%), limited by extreme flux-contrast
+requirements, but offering the only direct access to young, luminous
+giant planets on wide orbits ($>5\,\mathrm{AU}$).
+
+Figure~\ref{fig:cumulative} presents the cumulative discovery rate by
+method on a logarithmic scale, illustrating their distinct growth
+trajectories.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig02_cumulative_discovery.png}
+  \caption{
+    Cumulative confirmed exoplanet count by detection method from 1992 to 2026
+    (logarithmic $y$-axis). Vertical dashed lines mark the launch of
+    \textit{Kepler} (2009) and \textit{TESS} (2018), while the dotted line
+    indicates \textit{JWST} (2022). Transit detections exhibit rapid,
+    near-exponential growth after 2009, whereas RV detections increase
+    more steadily. Microlensing shows episodic growth driven by survey
+    campaigns (OGLE, MOA, KMTNet).
+  }
+  \label{fig:cumulative}
+\end{figure}
+
+Prior to 2009, the confirmed exoplanet sample comprised only
+$\sim 400$ planets, dominated by RV-detected hot Jupiters.
+The \textit{Kepler} mission fundamentally reshaped this landscape,
+delivering more than 2,600 planets and establishing that small,
+rocky planets are the most common outcome of planet formation
+\citep{Fressin2013}. 
+
+Following this, \textit{TESS} has sustained a discovery rate of
+$\sim 200$-$400\,\mathrm{yr}^{-1}$, with an emphasis on nearby
+($<200$~pc) bright host stars. This strategy provides a critical
+bridge between statistical surveys and detailed atmospheric
+characterisation, particularly with facilities such as
+\textit{JWST}.
+
+
+\subsection{Habitable Zone Analysis}
+
+Out of 6,278 confirmed exoplanets, 139 satisfy the conservative
+insolation criterion ($0.2 \leq S_p/\Searth \leq 1.8$) and are
+therefore located within the habitable zone (HZ). Independently,
+999 planets fall within the Earth-sized radius range
+($0.5$--$1.5\,\Rearth$). The intersection of these two criteria
+yields a sample of \textbf{29 potentially habitable candidates (PHCs)}.
+
+Figure~\ref{fig:mass_radius} places this selection in the broader
+context of the exoplanet population by showing the mass - radius
+distribution on a logarithmic scale.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig03_mass_radius.png}
+  \caption{
+    Mass- radius diagram of confirmed exoplanets (log - log scale),
+    colour coded by detection method. The green shaded region indicates
+    the Earth-like radius regime ($\sim 0.5$ - $1.5\,\Rearth$), while the red band marks the Fulton radius gap ($\sim 1.5$ - $2.0\,\Rearth$).
+    Vertical dotted lines denote characteristic mass scales:
+    $1\,M_{\oplus}$, $1\,M_{\mathrm{Jup}}$, and the brown dwarf limit
+    ($13\,M_{\mathrm{Jup}}$). The overlaid curve illustrates the
+    theoretical mass - radius relation, highlighting the transition from
+    rocky to gas dominated planets.
+  }
+  \label{fig:mass_radius}
+\end{figure}
+
+The diagram clearly illustrates the transition from compact rocky
+planets to gas-dominated envelopes across the Fulton gap. The PHC
+selection lies within the lower-radius regime, consistent with
+planets that are likely to retain solid surfaces and potentially
+stable atmospheres.
+
+To explore the combined effects of size and irradiation,
+Figure~\ref{fig:classmap} shows the full planet population in the
+radius - insolation plane, colour-coded by planet class.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig04_classification_map.png}
+  \caption{
+    Planet classification map in radius - insolation space for all
+    6,278 confirmed exoplanets. Colours indicate planet classes.
+    The cyan band marks the conservative habitable zone, while the
+    red band highlights the Fulton radius gap
+    ($1.5$ - $2.0\,\Rearth$). The gold dashed line indicates
+    Earth equivalent insolation. Black stars mark the 29 PHCs.
+    The strong clustering of planets at high insolation reflects
+    the observational bias of transit surveys toward short-period
+    systems.
+  }
+  \label{fig:classmap}
+\end{figure}
+
+This distribution shows that the vast majority of confirmed planets
+orbit well interior to the habitable zone, often receiving orders of
+magnitude more stellar flux than Earth. This reflects the strong
+selection bias of transit surveys toward short orbital periods.
+
+Figure~\ref{fig:kopparapu} shows the distribution of confirmed planets
+in the insolation--radius plane, highlighting the location of
+potentially habitable candidates (PHCs).
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig05_hz_insolation.png}
+  \caption{
+    Insolation flux ($S_p$) versus planetary radius for all confirmed
+    exoplanets. Grey points represent the full population, while red
+    markers indicate the 29 potentially habitable candidates (PHCs).
+    The green shaded region denotes the conservative habitable zone
+    ($0.2 \leq S_p/\Searth \leq 1.8$), and the blue band marks the
+    Earth-sized radius range ($0.5$--$1.5\,\Rearth$).
+    The vertical dashed line indicates Earth-equivalent insolation
+    ($S_p = 1\,\Searth$). The clustering of confirmed planets at high
+    insolation reflects the strong observational bias of transit
+    surveys toward short-period systems.
+  }
+  \label{fig:kopparapu}
+\end{figure}
+
+The distribution highlights that the majority of confirmed planets lie
+well interior to the habitable zone, receiving significantly higher
+stellar flux than Earth. In contrast, the PHCs occupy a narrow region
+where both irradiation and size constraints are simultaneously satisfied.
+
+This representation also shows that the habitable zone around low-mass
+stars is more densely populated in the current census, primarily due to
+shorter orbital periods that enhance both transit detectability and
+radial-velocity follow-up. Systems such as TRAPPIST-1 provide clear
+examples, where multiple planets lie within the conservative habitable
+zone of a cool host star ($\Teff \approx 2{,}566\,\mathrm{K}$).
+
+
+\section{Potentially Habitable Planets Catalogue}
+
+Table~\ref{tab:phc} presents the complete catalogue of 29 potentially habitable planet candidates, sorted by increasing distance from Earth. The catalogue includes fundamental parameters necessary for habitability assessment and observational prioritization.
+
+\begin{table*}[t!]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+
+\caption{
+Complete catalogue of 29 potentially habitable planet candidates (PHCs)
+satisfying $0.2 \leq S_p/S_{\oplus} \leq 1.8$ and
+$0.5 \leq R_p/R_{\oplus} \leq 1.5$, sorted by increasing distance.
+}
+\label{tab:phc}
+
+\begin{tabular}{llccccr}
+\toprule
+\textbf{Planet} & \textbf{Host Star} & \textbf{Sp. Type} &
+\textbf{$R_p$ ($R_{\oplus}$)} & \textbf{$T_{eq}$ (K)} &
+\textbf{$S_p$ ($S_{\oplus}$)} & \textbf{$d$ (pc)} \\
+\midrule
+
+Proxima Cen b        & Proxima Centauri & M5.5\,Ve & 1.020 & 218 & 0.641 &   1.30 \\
+Ross 128 b           & Ross 128         & M4\,V    & 1.110 & 301 & 1.380 &   3.37 \\
+GJ 1061 c            & GJ 1061          & M5.5\,V  & 1.190 & --- & 1.400 &   3.67 \\
+GJ 1061 d            & GJ 1061          & M5.5\,V  & 1.160 & --- & 0.600 &   3.67 \\
+Teegarden's Star c   & Teegarden's Star & M7.0\,V  & 1.020 & 209 & 0.350 &   3.83 \\
+Teegarden's Star b   & Teegarden's Star & M7.0\,V  & 1.050 & 277 & 1.080 &   3.83 \\
+GJ 1002 c            & GJ 1002          & M5.5\,V  & 1.100 & 182 & 0.257 &   4.85 \\
+GJ 1002 b            & GJ 1002          & M5.5\,V  & 1.030 & 231 & 0.670 &   4.85 \\
+Wolf 1069 b          & Wolf 1069        & M5.0\,V  & 1.080 & 250 & 0.652 &   9.58 \\
+L 98-59 f            & L 98-59          & M3\,V    & 1.480 & 285 & 1.100 &  10.62 \\
+G 261-6 b            & G 261-6          & M5.5\,V  & 1.100 & 322 & 1.800 &  10.63 \\
+Gliese 12 b          & Gliese 12        & M3.0\,V  & 0.930 & 315 & 1.620 &  12.21 \\
+TRAPPIST-1 e         & TRAPPIST-1       & M8.0\,V  & 0.920 & 250 & 0.646 &  12.43 \\
+TRAPPIST-1 d         & TRAPPIST-1       & M8.0\,V  & 0.788 & 286 & 1.115 &  12.43 \\
+TRAPPIST-1 g         & TRAPPIST-1       & M8.0\,V  & 1.129 & 197 & 0.252 &  12.43 \\
+TRAPPIST-1 f         & TRAPPIST-1       & M8.0\,V  & 1.045 & 218 & 0.373 &  12.43 \\
+TOI-700 e            & TOI-700          & M2.5\,V  & 0.953 & 273 & 1.270 &  31.13 \\
+TOI-700 d            & TOI-700          & M2.5\,V  & 1.073 & 269 & 0.850 &  31.13 \\
+LP 890-9 c           & LP 890-9         & M6\,V    & 1.367 & 272 & 0.906 &  32.43 \\
+K2-3 d               & K2-3             & M\,V     & 1.458 & 305 & 1.440 &  44.07 \\
+K2-72 e              & K2-72            & ---      & 1.290 & --- & 1.200 &  66.43 \\
+Kepler-138 e         & Kepler-138       & M1\,V    & 0.797 & 292 & 1.730 &  66.86 \\
+Kepler-1649 c        & Kepler-1649      & ---      & 1.060 & 234 & 0.750 &  92.19 \\
+Kepler-1512 b        & Kepler-1512      & ---      & 1.180 & 322 & 1.600 & 162.00 \\
+Kepler-186 f         & Kepler-186       & M1       & 1.170 & 177 & 0.300 & 177.59 \\
+Kepler-438 b         & Kepler-438       & ---      & 1.120 & 288 & 1.400 & 195.94 \\
+Kepler-1229 b        & Kepler-1229      & ---      & 1.400 & 212 & 0.524 & 265.48 \\
+Kepler-62 f          & Kepler-62        & K2\,V    & 1.410 & 208 & 0.500 & 300.87 \\
+Kepler-442 b         & Kepler-442       & ---      & 1.340 & 241 & 0.660 & 365.97 \\
+
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\begin{flushleft}
+\footnotesize
+\textit{Note.} $T_{eq}$ is computed assuming a Bond albedo
+$A_B = 0.3$. ``---'' indicates missing or unavailable values.
+\end{flushleft}
+
+\end{table*}
+
+The distance distribution of PHCs is shown in
+Figure~\ref{fig:phcdist}. A significant fraction of the sample lies
+within the solar neighbourhood, with several systems located within
+$\sim 10$--$15$ pc. These nearby targets are particularly important,
+as they offer the best opportunities for atmospheric characterisation.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig19_phc_distances.png}
+  \caption{
+    Distances to the 29 potentially habitable planet candidates (PHCs).
+    The blue dashed line marks 10~pc, within which detailed atmospheric
+    characterisation (e.g.\ with \textit{JWST}) is most feasible. The green
+    dashed line indicates 50~pc, a practical limit for future direct-imaging
+    missions such as the Habitable Worlds Observatory. A substantial fraction
+    of PHCs lie within the solar neighbourhood and predominantly orbit
+    M-dwarf hosts.
+    }
+  \label{fig:phcdist}
+\end{figure}
+
+Figure~\ref{fig:phcteq} compares equilibrium temperature and planetary
+radius for the PHC sample. Most candidates cluster close to the
+Earth-like regime in both size and irradiation, although a modest
+spread remains due to differences in stellar type and orbital distance.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig20_phc_teq_radius.png}
+  \caption{
+    Equilibrium temperature ($\Teq$) versus planetary radius for the
+    29 potentially habitable planet candidates (PHCs), colour-coded by
+    system distance. The green band marks the Earth-sized radius range
+    ($0.5$--$1.5\,\Rearth$), while the vertical band indicates the
+    approximate liquid-water temperature window (200--370 K).
+    The Earth reference point is shown for comparison.
+    Most PHCs cluster close to this region, particularly those orbiting
+    nearby M-dwarf systems.
+    }
+  \label{fig:phcteq}
+\end{figure}
+
+
+\subsection{Metallicity and Planet Type}
+
+The dependence of planet properties on host-star metallicity, along with
+the distribution of system multiplicity, is shown in
+Figure~\ref{fig:metallicity}.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig13_metallicity_multiplicity.png}
+  \caption{
+    \textit{Left:} Stellar metallicity ($\FeH$) distributions for giant
+    planets ($R_p \geq 6\,\Rearth$) and terrestrial planets
+    ($R_p < 2\,\Rearth$). Giant planets are preferentially found around
+    metal-rich stars, while terrestrial planets span a broader range of
+    metallicities centred near solar values.
+    \textit{Right:} Distribution of planetary system multiplicity $N_p$.
+    Single-planet systems dominate, although systems with multiple planets
+    are also common.
+  }
+  \label{fig:metallicity}
+\end{figure}
+
+The metallicity distribution clearly reproduces the well-known
+planet-metallicity correlation, in which giant planets are more likely
+to form around stars with super-solar metallicities
+\citep{Santos2004, Fischer2005}. In contrast, smaller planets are found
+around stars spanning a wide range of metallicities, suggesting that
+their formation is less sensitive to the initial metal content of the
+protoplanetary disk.
+
+The multiplicity distribution shows that most systems host a single
+confirmed planet, although compact multi-planet systems are not uncommon.
+Such systems provide important constraints on planetary system formation
+and dynamical evolution.
+
+\subsection{Stellar Type vs.\ Planet Occurrence}
+
+The relationship between host-star effective temperature and planet
+radius is illustrated in Figure~\ref{fig:heatmap}, which presents a
+two-dimensional occurrence map of the exoplanet population.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig18_occurrence_heatmap.png}
+  \caption{
+    Planet occurrence heat map showing stellar effective temperature
+    ($\Teff$) versus planet radius (logarithmic scale), coloured by
+    the number of planets in each bin. The dashed lines mark the
+    approximate boundaries of the Fulton radius gap
+    ($1.5$--$2.0\,\Rearth$). Giant planets ($R_p > 7\,\Rearth$) are
+    most common around Sun-like stars, while sub-Neptune and
+    super-Earth populations dominate around cooler K- and M-dwarf
+    hosts. The solar effective temperature is indicated for reference.
+  }
+  \label{fig:heatmap}
+\end{figure}
+
+The heat map highlights several key features of the exoplanet population.
+The Fulton radius gap appears as a persistent low-density region across
+all stellar temperatures, indicating a universal transition between
+rocky and gas-rich planets. Smaller planets are more abundant around
+cooler stars, while giant planets are preferentially associated with
+Sun-like hosts. These trends reflect both underlying planet-formation
+physics and observational selection effects.
+
+
+\subsection{Radius Gap and Orbital Period}
+
+The radius distribution of planets is shown in Figure~\ref{fig:fulton}.
+The gap likely arises from atmospheric mass loss processes,
+which strip gaseous envelopes from lower-mass planets.
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig11_fulton_gap.png}
+  \caption{
+    Planet radius distribution showing the Fulton gap at
+    $1.5$--$2.0\,\Rearth$. This feature separates rocky planets
+    from gas-rich sub-Neptunes.
+  }
+  \label{fig:fulton}
+\end{figure}
+
+
+Figure~\ref{fig:period} shows the distribution of orbital period
+as a function of planet radius.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig12_period_radius.png}
+  \caption{
+    Orbital period versus planet radius (log--log).
+    Most detected planets lie at short periods, reflecting
+    observational bias toward close-in systems.
+  }
+  \label{fig:period}
+\end{figure}
+
+The strong concentration of planets at $P < 20$ days highlights
+the sensitivity of transit surveys to short-period systems,
+while the habitable-zone region remains comparatively under-sampled.
+
+\subsection{All-Sky Distribution}
+
+The spatial distribution of confirmed exoplanets is shown in
+Figure~\ref{fig:skymap}, using a Mollweide projection in equatorial
+coordinates. The overall distribution is highly non-uniform, with a
+clear concentration in the \textit{Kepler} field.
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/fig24_skymap.png}
+  \caption{
+    All-sky Mollweide projection of confirmed exoplanets (blue points)
+    and the 29 potentially habitable candidates (red stars). The strong
+    overdensity corresponds to the fixed pointing of the \textit{Kepler}
+    mission, while the broader distribution reflects the near all-sky
+    coverage of \textit{TESS}. Nearby PHCs are distributed across the sky,
+    with several located within 15 pc.
+  }
+  \label{fig:skymap}
+\end{figure}
+
+The strong clustering of planets in a limited region of the sky reflects
+the observing strategy of \textit{Kepler}, which continuously monitored a
+single field. In contrast, the more uniform spread of recent detections is
+driven by \textit{TESS}, which surveys nearly the entire sky. The PHC sample,
+dominated by nearby M-dwarf systems, is not confined to a specific region,
+highlighting the growing role of targeted radial-velocity surveys in the
+solar neighbourhood.
+
+
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{M-Dwarf Dominance and Habitability}
+
+Most PHCs in our sample orbit M-dwarf stars (22 out of 23 with known
+spectral types). This is partly expected, as M dwarfs are the most common
+stars in the Galaxy and are well suited for planet detection. Their
+habitable zones lie close to the star, making transits more likely and
+radial-velocity signals easier to measure.
+
+However, habitability around M dwarfs is still uncertain. Young M dwarfs
+emit strong high-energy radiation that can erode planetary atmospheres.
+Planets in these systems are also likely to be tidally locked, which may
+lead to large temperature differences between their day and night sides.
+In addition, frequent stellar flares can significantly alter atmospheric
+chemistry. While models suggest that thick atmospheres may stabilise
+surface conditions, observational confirmation is still lacking.
+
+\subsection{Nearby Targets: Proxima Centauri and TRAPPIST-1}
+
+The nearest PHC, Proxima~Centauri~b ($d = 1.30$ pc), is particularly
+important because it offers the best opportunity for future direct
+characterisation. Its size and insolation are similar to Earth, but its
+host star is highly active, and it is unclear whether the planet has
+retained a stable atmosphere.
+
+The TRAPPIST-1 system represents a different but equally important case.
+It contains multiple planets in or near the habitable zone within a
+compact orbital configuration. Among them, TRAPPIST-1~e is considered
+the most Earth-like based on current constraints. The system provides
+a unique laboratory for studying planetary climates under similar
+stellar conditions.
+
+\subsection{Occurrence Rates and Implications}
+
+The fraction of PHCs identified in this study is small ($\sim 0.5\%$),
+but this is strongly affected by observational bias. Transit surveys are
+much more sensitive to short-period planets, meaning that habitable-zone
+planets around Sun-like stars are underrepresented.
+
+Corrected occurrence-rate estimates suggest that habitable-zone rocky
+planets are common, particularly around M dwarfs. When scaled to the
+entire Galaxy, this implies that a very large number of potentially
+habitable worlds exist, even within a few kiloparsecs of the Sun.
+
+\subsection{Future Prospects}
+
+Current observations are beginning to probe the atmospheres of nearby
+rocky planets, especially those around M dwarfs. The next major step
+is the detection of atmospheric molecules that could indicate habitability
+or biological activity.
+
+Future missions will play a crucial role in this effort. Space-based
+telescopes designed for direct imaging will be able to observe Earth-like
+planets around Sun-like stars, while ongoing transit surveys will continue
+to expand the sample of nearby targets. Together, these approaches will
+help move the field from detection to characterisation.
+
+\section{Conclusion}
+\label{sec:conclusions}
+
+We have analysed the current population of confirmed exoplanets to
+identify potentially habitable candidates using simple but physically
+motivated criteria. Out of 6,278 confirmed planets, 29 satisfy both
+habitable-zone insolation limits and Earth-like size constraints.
+
+The present sample is dominated by planets orbiting M-dwarf stars,
+reflecting both observational bias and the high occurrence rate of
+small planets around low-mass stars. Nearby systems such as Proxima
+Centauri and TRAPPIST-1 represent key targets for future atmospheric
+studies.
+
+Although the observed fraction of habitable candidates is small, this
+is largely due to detection limitations. Statistical corrections suggest
+that habitable rocky planets are common in the Galaxy.
+
+With upcoming observational facilities, the focus is expected to shift
+from detection to detailed characterisation. The coming decades will
+be critical for determining whether any of these worlds host conditions
+suitable for life.
+
+
+\section*{Acknowledgements}
+
+We gratefully acknowledge the use of the NASA Exoplanet Archive
+(\url{https://exoplanetarchive.ipac.caltech.edu}), which provided
+the data used in this study. We also thank the science teams of the
+\textit{Kepler} and \textit{TESS} missions for making high-quality
+exoplanet data publicly available.
+
+We would like to sincerely thank our course instructor,
+Prof.\ Dibyendu Nandi, and Rajesh Kumble Nayek for their guidance
+and for giving us the opportunity to carry out this project.
+
+All analysis was performed in Python using widely used scientific
+libraries, including \texttt{pandas}, \texttt{NumPy},
+\texttt{SciPy}, and \texttt{Matplotlib}.
+
+\medskip
+\noindent\textit{Data availability:} All data used in this work are
+publicly available from the NASA Exoplanet Archive (\url{https://exoplanetarchive.ipac.caltech.edu}).
+
+\medskip
+\noindent\textit{Code availability:} The code used for data processing,
+analysis, and figure generation is publicly available on GitHub:
+\url{https://github.com/your-repository-link}.
+
+\section*{Author Contributions}
+
+\begin{itemize}
+
+\item \textbf{Abhay Kumar Prusty (22MS087):} Major contribution to the
+habitability framework, PHC identification, and overall interpretation
+of the results.
+
+\item \textbf{Jeeban Jyoti (25IP22):} Major contribution to data analysis, statistical modelling, and figure generation.
+
+\item \textbf{Koushik Singha (22MS088):} Major contribution to data
+processing, visualisation, and analysis of stellar and planetary trends.
+
+\end{itemize}
+
+\bibliographystyle{aasjournal}   % or mnras, apj
+\bibliography{refs}
+
+
+
+\end{document}
