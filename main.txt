@@ -747,7 +747,7 @@ publicly available from the NASA Exoplanet Archive (\url{https://exoplanetarchiv
 \medskip
 \noindent\textit{Code availability:} The code used for data processing,
 analysis, and figure generation is publicly available on GitHub:
-\url{https://github.com/your-repository-link}.
+\url{https://github.com/Abhaypru/Exoplanet-Habitability-Analysis}.
 
 \section*{Author Contributions}
 
